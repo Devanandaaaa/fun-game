@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unicorn Race to the Rainbow</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to right, #91181c, #fecfef);
+            font-family: 'Comic Sans MS', Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .game-box {
+            position: relative;
+            width: 400px;
+            height: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        .unicorn {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: url('https://cdn-icons-png.flaticon.com/512/3463/3463446.png') no-repeat center/cover;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .star, .cloud {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+        }
+        .star {
+            background: url('https://cdn-icons-png.flaticon.com/512/1828/1828884.png') no-repeat center/cover;
+        }
+        .cloud {
+            background: url('https://cdn-icons-png.flaticon.com/512/414/414927.png') no-repeat center/cover;
+        }
+        h2, p {
+            color: white;
+        }
+        .game-over, .win-message {
+            display: none;
+            font-size: 24px;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h2>Unicorn Race to the Rainbow! 🦄🌈</h2>
+    <div class="game-box" id="game-box">
+        <div class="unicorn" id="unicorn"></div>
+    </div>
+    <p id="message">Collect 10 stars ⭐ and avoid clouds ⛈️!</p>
+    <p class="game-over" id="game-over">Game Over 💔<br><button onclick="restartGame()">Restart</button></p>
+    <p class="win-message" id="win-message">You reached the rainbow! 🎉<br><button onclick="restartGame()">Play Again</button></p>
+    
+    <script>
+        const gameBox = document.getElementById("game-box");
+        const unicorn = document.getElementById("unicorn");
+        const message = document.getElementById("message");
+        const gameOverMessage = document.getElementById("game-over");
+        const winMessage = document.getElementById("win-message");
+        let unicornX = gameBox.clientWidth / 2 - 30;
+        unicorn.style.left = `${unicornX}px`;
+        let score = 0;
+        let lives = 3;
+
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "ArrowLeft" && unicornX > 0) {
+                unicornX -= 20;
+            } else if (event.key === "ArrowRight" && unicornX < gameBox.clientWidth - 60) {
+                unicornX += 20;
+            }
+            unicorn.style.left = `${unicornX}px`;
+        });
+
+        function spawnItem(type) {
+            const item = document.createElement("div");
+            item.classList.add(type);
+            let itemX = Math.random() * (gameBox.clientWidth - 40);
+            item.style.left = `${itemX}px`;
+            gameBox.appendChild(item);
+            
+            let itemY = 0;
+            let fallInterval = setInterval(() => {
+                itemY += 5;
+                item.style.top = `${itemY}px`;
+                
+                if (itemY > gameBox.clientHeight) {
+                    clearInterval(fallInterval);
+                    item.remove();
+                }
+                
+                if (itemY > gameBox.clientHeight - 70 && itemX > unicornX - 20 && itemX < unicornX + 60) {
+                    clearInterval(fallInterval);
+                    item.remove();
+                    if (type === "star") {
+                        score++;
+                        message.textContent = "Score: " + score + " ⭐";
+                        if (score >= 10) {
+                            winMessage.style.display = "block";
+                            gameBox.style.display = "none";
+                        }
+                    } else if (type === "cloud") {
+                        lives--;
+                        message.textContent = "Lives: " + lives + " 💔";
+                        if (lives <= 0) {
+                            gameOverMessage.style.display = "block";
+                            gameBox.style.display = "none";
+                        }
+                    }
+                }
+            }, 30);
+        }
+
+        function startGame() {
+            setInterval(() => spawnItem("star"), 1500);
+            setInterval(() => spawnItem("cloud"), 2500);
+        }
+
+        function restartGame() {
+            location.reload();
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
